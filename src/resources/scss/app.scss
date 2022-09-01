@@ -1,0 +1,7 @@
+// https://www.npmjs.com/package/sass, https://github.com/sass/node-sass
+
+@import "variables";
+
+h1 {
+    color: $red-color;
+}
