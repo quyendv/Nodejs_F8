@@ -1,0 +1,198 @@
+{{!-- Ban đầu là thẻ div, đến bài checkbox all đổi thành form, hoặc tạo thêm form ôm dữ liệu trong checkbox cũng đc, chỉ cần bọc lại các phần checkbox là đc --}}
+{{!-- Nút btn-check-all-submit nhớ để là button chứ k phải div thì nó sẽ tự submit form với method GET với nhiều query là các value của checkbox (tức courseId) --}}
+<form class='mt-4' name="container-form" method="post" action='/courses/handle-form-actions'>
+    <div>
+        <h3>Khóa học của tôi</h3>
+        <a href="/me/trash/courses">Thùng rác: {{deletedCount}}</a>
+        <div class="mt-4 d-flex align-items-center">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="checkbox-all">
+                <label class="form-check-label" for="checkbox-all">
+                    Chọn tất cả
+                </label>
+            </div>
+
+            <select class="form-select form-select-sm checkbox-select-all-options" name="action" required>
+                <option value="" selected>--Chọn hành động--</option> {{!-- selected là luôn chọn, còn k có nó sẽ chọn option đầu tiên. Thêm value trống thì nó sẽ k lấy cái --Chọn hành động-- khi res.json(resq.body) cơ mà nếu thêm cùng selected lại k có tác dụng => giải pháp là sửa lại hàm .onsumit dưới chỗ js, và thêm required vào và nó sẽ bắt buộc chọn option có value (rỗng k tính) --}}
+                <option value="delete">Xóa</option>
+            </select>
+            {{!-- disabled ở đây là class của bootstrap nó css giao diện, đồng thời từ bs5 đã thêm pointer-events: none nên k cần sửa như video fixbug: https://youtu.be/dBZsgn1yzog --}}
+            {{!-- Như video thì sẽ phải bỏ class disabled đi và thêm vào attribute là disabled (attribute nhé k phải class, có thể viết disabled="disabled") --}}
+            {{!-- Nếu dùng attribute disabled thì để thêm/xóa dùng: button.setAttribute('disabled', ''), button.removeAttribute('disabled'), toggleAttribute("disabled") --}}
+            <button class="btn btn-primary btn-sm btn-check-all-submit disabled">Thực hiện</button> {{!-- Khi nào select mới bỏ disabled --}}
+        </div>
+    </div>
+    
+    <table class='table'>
+        <thead>
+            <tr>
+                <th scope='col' colspan="2">#</th> {{!-- bù cho checkbox phần body mới thêm vào --}}
+                <th scope='col'>
+                    Tên khóa học
+                    {{!-- sortable là helpers trong src/index.js, _sort là res.locals, cả 2 đều gọi được trong cặp đôi ngoặc nhọn --}}
+                    {{!-- Tuy nhiên do XSS nên nó sẽ sửa dấu <> thành &lt, &gt để làm gì bảo mật ấy, xem kỹ video: https://youtu.be/MJ7JZSW6seA?t=2016 nên phải dùng cặp 3 dấu ngoặc nhọn --}}
+                    {{{sortable 'name' _sort}}}
+                </th>
+                <th scope='col'>
+                    Trình độ
+                    {{{sortable 'level' _sort}}}
+                </th>
+                <th scope='col'>
+                    Thời gian tạo
+                    {{{sortable 'createdAt' _sort}}}
+                </th>
+                <th></th>
+                {{! Thẻ th trống để khớp với thẻ td chứa 2 thẻ a bên dưới, hoặc thêm attr colspan="2" cho th cuối }}
+            </tr>
+        </thead>
+        <tbody>
+            {{#each courses}} {{!-- Sau each là key của object?? --}}
+                <tr>
+                    <td>
+                        <div class="form-check">
+                            {{! Chú ý phần name để số nhiều và có [] để hiểu dù chọn 0, 1 hay nhiều nó vẫn luôn là mảng, nếu k có lúc là 1 value lúc là mảng dễ lỗi. Nữa là k để id vì nút này lặp cho các phần tử}}
+                            <input class="form-check-input" type="checkbox" value="{{this._id}}" name="courseIds[]">
+                        </div>
+                    </td>
+                    
+                    {{! @key với object, ở đây index từ 0, k thể + 1 hay ++ được đâu: https://handlebarsjs.com/guide/#custom-helpers }}
+                    {{! thêm custom helpers ở src/index.js, cách dùng tên function param1 param2 }}
+                    <th scope='row'>{{sum @index 1}}</th>
+                    <td>{{this.name}}</td>
+                    <td>{{this.level}}</td>
+                    <td>@{{this.createdAt}}</td>
+                    <td>
+                        {{! ./, / hay courses/... đều được }}
+                        <a href='/courses/{{this._id}}/edit' class='btn btn-link'>Sửa</a>
+                        {{! Thay vì tạo form rồi cho link vào như edit, ta dùng kèm với bootstrap, search data-whatever, ta truyền id vào }}
+                        <a
+                            href=''
+                            class='btn btn-link'
+                            data-bs-toggle='modal'
+                            data-bs-target='#delete-course-modal'
+                            data-id='{{this._id}}'
+                        >Xóa</a>
+                    </td>
+                </tr>
+
+            {{else}} {{!-- Nếu courses rỗng --}}
+                <tr>
+                    <td colspan="5" class="text-center">
+                        Bạn chưa đăng khóa học nào. 
+                        <a href="/courses/create">Đăng khóa học</a>
+                    </td>
+                </tr>            
+            {{/each}}
+        </tbody>
+    </table>
+</form>
+
+{{! Modal confirm delete courses }}
+<div class='modal' id='delete-course-modal' tabindex='-1'>
+    <div class='modal-dialog'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h5 class='modal-title'>Xóa khóa học?</h5>
+                <button
+                    type='button'
+                    class='btn-close'
+                    data-bs-dismiss='modal'
+                    aria-label='Close'
+                ></button>
+            </div>
+            <div class='modal-body'>
+                <p>Bạn chắc chắn muốn xóa khóa học này chứ?</p>
+            </div>
+            <div class='modal-footer'>
+                <button type='button' class='btn btn-danger btn-confirm-delete-course'>Xóa bỏ</button>
+                <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{!-- Tạo form để thực hiện delete thay vì mỗi lần lặp tạo 1 cái như trên - Delete hidden form => dùng script để thêm action='/courses/{{course._id}}?_method=DELETE' --}}
+<form name="delete-course-form" method='post'></form>
+
+{{! Phần script cho delete, để đây cũng được }}
+<script>
+    // Ở đây k dùng jQuery như video (do video cũ: https://youtu.be/yt8TemGS3aw?t=1376) nếu dùng jQuery có lỗi phải thêm event DOMContentLoaded
+    // Lấy modal bật lên (deleteModal)
+    const deleteCourseModal = document.getElementById('delete-course-modal');
+
+    // Lấy delete-course-form
+    const deleteForm = document.forms['delete-course-form'];
+
+    // Lấy nút xác nhận xóa ở modal: lâu k dùng qS phải nhớ . đầu class nhé :<
+    const btnConfirmDeleteCourse = document.querySelector('.btn-confirm-delete-course');
+
+    // Bắt sự kiện khi bật: muốn lấy ra id của khóa bị xóa => Cái này thực ra dùng event bật để tìm nút đã bật nó (trong số nhiều nút) rồi tìm id khóa học trong nút đó => Tuy nhiên rõ ràng ta có thể làm như restore dùng forEach kèm onclick rồi truy ra đc nút bấm mà, lấy id có khó vậy đâu
+    let courseId;
+    deleteCourseModal.addEventListener('show.bs.modal', event => {
+        // Lấy nút đã bấm để hiện lên modal (nút xóa của khóa học), dùng event.target cũng đc sao ấy
+        const button = event.relatedTarget;
+        // Lấy attr id của nút xóa của khóa học
+        courseId = button.getAttribute('data-id'); // hoặc element.dataset.id
+        // console.log(courseId)
+    })
+
+    // Lấy được id rồi thì truyền vào action deleteForm:
+    btnConfirmDeleteCourse.onclick = function() {
+        // alert(courseId);
+        deleteForm.action = '/courses/' + courseId + '?_method=DELETE';
+        deleteForm.submit(); // sau khi set form xong thì submit thôi, dùng event thay vì btn type submit
+    }
+
+    // ********** Phần checkbox-all: https://youtu.be/YilPrQiKOfE, tham khảo video vì dùng jQuery khá hay, tuy nhiên mình đang k dùng nên tự convert
+    const checkboxAll = document.querySelector('#checkbox-all');
+    const courseItemCheckbox = document.querySelectorAll('input[name="courseIds[]"]'); // Lấy checkbox của các khóa học bằng qSA kết hợp selector attr, return NodeList
+    // console.log(courseItemCheckbox) // query phải check thử luôn k lỗi k biết từ đâu
+
+    const checkAllSubmitBtn = document.querySelector('.btn-check-all-submit');
+    const containerForm = document.forms['container-form']; // truyền theo name hoặc id
+
+    // checkboxAll onclick, onchange hay oninput đều hoạt động nhé
+    checkboxAll.oninput = function() {
+        const isCheckAll = this.checked; // hoặc this.matches(':checked'), làm trong validation ở JSBasic rồi ấy
+        
+        // if (isCheckAll) {
+        //     courseItemCheckbox.forEach( eachItem => eachItem.checked = true); // tham khảo jQuery cực gọn luôn :< https://stackoverflow.com/questions/8206565/check-uncheck-checkbox-with-javascript
+        //     // courseItemCheckbox.forEach( eachItem => eachItem.setAttribute( "checked", 'checked')); // cách 2 (k phải set true nhé), chứ .matches chỉ để check thôi k đổi đc
+        // } else {
+        //     courseItemCheckbox.forEach( eachItem => eachItem.checked = false); // k dùng được cách 2, set !checked, false, null đều k đc :<
+        // }
+
+        courseItemCheckbox.forEach( eachItem => eachItem.checked = isCheckAll); // vầy cho gọn
+        renderCheckAllSubmitBtn();
+    }
+
+    // checkbox each onclick, onchange hay oninput 
+    courseItemCheckbox.forEach( eachItem => {
+        eachItem.onchange = function() {
+            // Cách dưới là so length số checkbox với số checkbox bật (bằng qSA điều kiện :checked .length)
+            // Ở đây đã for 1 vòng để addEvent cho từng phần tử rồi, k thể for tiếp để đếm nút bật đc sẽ rất khó
+            const isCheckAll = courseItemCheckbox.length === document.querySelectorAll('input[name="courseIds[]"]:checked').length;
+            // console.log(isCheckAll); // in thử mới biết dòng trên qSA xong thiếu .length
+            
+            // set lại checkboxAll, nếu courseItemCheckbox bật hết thì checkboxAll bật và ngược lại
+            checkboxAll.checked = isCheckAll; // vầy cho gọn khỏi if else
+            renderCheckAllSubmitBtn();
+        }
+    })
+
+    // toggle disabled cho nút Thực hiện (submit): chỉ khi checked ít nhất 1 checkbox thì mới bỏ disabled
+    function renderCheckAllSubmitBtn() {
+        const hasChecked = document.querySelectorAll('input[name="courseIds[]"]:checked').length > 0;
+        checkAllSubmitBtn.classList.toggle('disabled', !hasChecked); // nếu hasChecked = true thì remove, else ...
+    }
+
+    // btn-check-all-submit click: nó chỉ click đc khi bỏ disable
+    checkAllSubmitBtn.onsubmit = function(e) {
+        const isSubmitable = !this.classList.contains('disabled'); // nếu nó k có disable tức ấn được thì là có thể submit
+        if (!isSubmitable) {
+            e.preventDefault(); // mặc định submit với method GET (tức chuyển hướng nma do k có action nên nó đến trang hiện tại - tức reload page)
+                                // Ngăn submit, chỉ khi submit đc (bỏ disable <-> có checked mới submit với dạng post)
+                                // pointer-events: none; đã được thêm vào khi có class disable rồi (từ bootstrap 5) nên về mặc logic vẫn đúng và k bị lỗi như video fixbug: https://youtu.be/dBZsgn1yzog
+        } // else submit theo những gì đã config
+    }
+</script> 

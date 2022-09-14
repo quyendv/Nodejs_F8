@@ -1,7 +1,30 @@
 // https://www.npmjs.com/package/sass, https://github.com/sass/node-sass
 
-@import "variables";
+@import 'variables';
 
 h1 {
     color: $red-color;
+}
+
+// * {
+//     padding: 0;
+//     margin: 0;
+//     box-sizing: border-box;
+// }
+// html {
+//     color: #333;
+//     // font-size: 62.5%;
+//     font-family: 'Open Sans', sans-serif;
+// }
+
+.user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.checkbox-select-all-options {
+    width: max-content;
+    margin: 0 8px;
 }

@@ -1,52 +1,63 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">F8 courses</a>
+<nav class='navbar navbar-expand-lg navbar-dark bg-dark'>
+    <div class='container'>
+        <a class='navbar-brand' href='/'>F8 courses</a>
         <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
+            class='navbar-toggler'
+            type='button'
+            data-bs-toggle='collapse'
+            data-bs-target='#navbarSupportedContent'
+            aria-controls='navbarSupportedContent'
+            aria-expanded='false'
+            aria-label='Toggle navigation'
         >
-            <span class="navbar-toggler-icon"></span>
+            <span class='navbar-toggler-icon'></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a
-                        class="nav-link active"
-                        aria-current="page"
-                        href="#"
-                    >Home</a>
+        <div class='collapse navbar-collapse' id='navbarSupportedContent'>
+            {{! After login }}
+            <ul class='navbar-nav ms-auto mb-2 mb-lg-0'>
+                {{! <li class='nav-item'>
+                    <a class='nav-link active' aria-current='page' href='#'>Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
-                </li>
-                <li class="nav-item dropdown">
+                <li class='nav-item'>
+                    <a class='nav-link' href='#'>Link</a>
+                </li> }}
+                <li class='nav-item dropdown'>
                     <a
-                        class="nav-link dropdown-toggle"
-                        href="#"
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
+                        class='nav-link dropdown-toggle'
+                        href='#'
+                        role='button'
+                        data-bs-toggle='dropdown'
+                        aria-expanded='false'
                     >
-                        Dropdown
+                        <img
+                            src='https://files.fullstack.edu.vn/f8-prod/user_photos/174438/621a10f3ab0c2.jpg'
+                            alt=''
+                            class='user-avatar'
+                        />
+                        User name
                     </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item" href="#">Something else
-                                here</a></li>
+
+                    <ul class='dropdown-menu'>
+                        {{! ./, / hay chỉ courses/create đều được?? mà trong CoursesController phần render('/courses lại lỗi') }}
+                        {{! Chú ý, nếu viết luôn courses/create bị lỗi tạo thêm đường dẫn vào kiểu đang ở me/stored/courses nó sẽ thành me/stored/courses/create}}
+                        {{! Tóm lại luôn dùng / ở đầu đi, file controller k dùng đc thì đổi khác, bắt đầu bằng tên luôn }}
+                        {{! Tất cả toàn link đến file html (hbs), từ html link đến html thì / còn js đến html thì name/... }}
+                        {{! Ta hình dung như từ localhost rồi / đến đâu thôi, cái này link trên đường dẫn web k phải hbs vì nó k phải stored-courses }}
+                        <li><a class='dropdown-item' href='/courses/create'>Đăng khóa học</a></li>
+                        <li><hr class='dropdown-divider' /></li>
+                        <li><a class='dropdown-item' href='/me/stored/courses'>Khóa học của tôi</a></li>
+                        <li><hr class='dropdown-divider' /></li>
+                        <li><a class='dropdown-item' href='/me/stored/news'>Bài viết của tôi</a></li>
+                        <li><hr class='dropdown-divider' /></li>
+                        <li><a class='dropdown-item' href='#'>Đăng xuất</a></li>
                     </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled">Disabled</a>
-                </li>
+                {{! <li class='nav-item'>
+                    <a class='nav-link disabled'>Disabled</a>
+                </li> }}
             </ul>
-            <form class="d-flex" role="search">
+            
+            {{! <form class="d-flex" role="search">
                 <input
                     class="form-control me-2"
                     type="search"
@@ -57,7 +68,7 @@
                     class="btn btn-outline-success"
                     type="submit"
                 >Search</button>
-            </form>
+            </form> }}
         </div>
     </div>
 </nav>
